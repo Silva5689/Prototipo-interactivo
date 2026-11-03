@@ -1,0 +1,153 @@
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#102b44" />
+    <meta name="description" content="Demo de Relevo: crea turnos de boxeo, asígnalos a los monitores y consulta los horarios de cada empleado." />
+    <link rel="icon" href="./relevo-icon.png" type="image/png" />
+    <link rel="stylesheet" href="./styles.css" />
+    <title>Relevo · Prototipo interactivo</title>
+    <script src="./js/data.js" defer></script>
+    <script src="./js/storage.js" defer></script>
+    <script src="./js/turnos.js" defer></script>
+    <script src="./js/ui.js" defer></script>
+    <script src="./js/main.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <a class="brand" href="#app" aria-label="Relevo, ir a la demo">
+          <img src="./relevo-logo.png" width="183" height="52" alt="Relevo, gestión de turnos sin fricción" />
+        </a>
+        <span class="header-label"><span class="header-dot" aria-hidden="true"></span> PROTOTIPO INTERACTIVO · DATOS FICTICIOS</span>
+      </div>
+    </header>
+
+    <main id="app">
+      <section class="demo-section" id="demo" aria-labelledby="demo-title">
+        <div class="container">
+          <div class="section-top">
+            <div>
+              <span class="eyebrow eyebrow-dark">RELEVO · DEMO DEL PROTOTIPO</span>
+              <h2 id="demo-title">Horarios del gimnasio</h2>
+              <p>Crea un turno, asígnalo a un monitor y comprueba que aparece en su horario.</p>
+            </div>
+            <button type="button" id="reset-button" class="reset-button" title="Restaurar las clases originales"><span aria-hidden="true">↺</span> Reiniciar demo</button>
+          </div>
+
+          <div class="demo-shell">
+            <div class="demo-toolbar">
+              <div class="role-switch" role="group" aria-label="Vista de la demostración">
+                <button type="button" id="role-manager" class="role-button active" aria-pressed="true"><span aria-hidden="true">▣</span> Encargado</button>
+                <button type="button" id="role-coach" class="role-button" aria-pressed="false"><span aria-hidden="true">♙</span> Monitor</button>
+              </div>
+              <div class="toolbar-status">
+                <span class="changes-chip" id="changes-chip">0 cambios</span>
+                <span class="demo-chip"><span class="demo-chip-dot" aria-hidden="true"></span> Entorno de prueba</span>
+              </div>
+            </div>
+
+            <div class="demo-body">
+              <div class="demo-main">
+                <div class="panel-head">
+                  <div><h3 id="list-title">Turnos del gimnasio</h3><p id="list-subtitle">Crea un turno nuevo o reasigna uno existente.</p></div>
+                  <div class="panel-actions">
+                    <span class="counter" id="class-count" aria-label="Número de turnos">5 turnos</span>
+                    <button type="button" id="create-turn-button" class="create-turn-button">+ Crear turno</button>
+                  </div>
+                </div>
+                <div id="manager-view" class="class-list" aria-label="Clases disponibles"></div>
+                <div id="coach-view" class="coach-view" hidden>
+                  <label for="coach-select" class="field-label">Selecciona un monitor ficticio</label>
+                  <select id="coach-select" class="field-select"></select>
+                  <div id="coach-classes" class="class-list" aria-label="Clases del monitor"></div>
+                  <div id="coach-notice" class="coach-notice" aria-live="polite"></div>
+                </div>
+              </div>
+
+              <aside class="editor" id="editor" aria-labelledby="editor-heading">
+                <div class="editor-top"><span class="step-label">GESTIÓN DE TURNOS</span><span class="editor-icon" aria-hidden="true">↗</span></div>
+                <h3 id="editor-heading">Asignar un turno</h3>
+                <p class="editor-description" id="editor-description">Selecciona una clase y elige qué monitor la cubrirá.</p>
+
+                <div id="assignment-panel">
+                  <div class="selected-class" id="selected-class" aria-live="polite"></div>
+                  <label class="field-label" for="new-coach">Monitor asignado</label>
+                  <select class="field-select" id="new-coach"></select>
+                  <p
+                    id="assignment-warning"
+                    class="form-warning"
+                    role="alert"
+                    hidden
+                  ></p>
+                  <button type="button" id="save-button" class="save-button" disabled>Guardar asignación <span aria-hidden="true">→</span></button>
+                  <p class="editor-tip"><span aria-hidden="true">ⓘ</span> Para añadir otra clase, pulsa «Crear turno».</p>
+                </div>
+
+                <form id="creation-panel" class="creation-form" hidden>
+                  <label class="field-label" for="create-title">Tipo de clase</label>
+                  <select class="field-select" id="create-title" required>
+                    <option value="Boxeo inicial">Boxeo inicial</option>
+                    <option value="Boxeo técnico">Boxeo técnico</option>
+                    <option value="Boxeo avanzado">Boxeo avanzado</option>
+                    <option value="Boxeo funcional">Boxeo funcional</option>
+                  </select>
+
+                  <div class="form-row">
+                    <div>
+                      <label class="field-label" for="create-day">Día</label>
+                      <select class="field-select" id="create-day" required>
+                        <option value="Lunes">Lunes</option>
+                        <option value="Martes">Martes</option>
+                        <option value="Miércoles">Miércoles</option>
+                        <option value="Jueves">Jueves</option>
+                        <option value="Viernes">Viernes</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="field-label" for="create-hour">Hora</label>
+                      <input class="field-select" id="create-hour" type="time" value="18:00" required />
+                    </div>
+                  </div>
+
+                  <label class="field-label" for="create-coach">Asignar a</label>
+                  <select class="field-select" id="create-coach" required></select>
+                  <p id="creation-warning" class="form-warning" role="alert" hidden></p>
+                  <button type="submit" class="save-button">Crear y asignar turno <span aria-hidden="true">→</span></button>
+                  <button type="button" id="cancel-create-button" class="cancel-create-button">Volver a los turnos</button>
+                </form>
+
+                <div class="change-receipt" id="change-receipt" hidden aria-live="polite">
+                  <div class="receipt-heading"><span class="receipt-check" aria-hidden="true">✓</span> <strong>Último cambio guardado</strong></div>
+                  <p id="receipt-description"></p>
+                  <div class="receipt-actions">
+                    <button type="button" id="see-coach-button" class="receipt-primary">Ver como monitor <span aria-hidden="true">→</span></button>
+                    <button type="button" id="undo-button" class="receipt-secondary">Deshacer</button>
+                  </div>
+                </div>
+              </aside>
+
+              <aside class="editor coach-sidebar" id="coach-sidebar" hidden aria-labelledby="coach-sidebar-heading">
+                <span class="step-label">VISTA DEL MONITOR</span>
+                <h3 id="coach-sidebar-heading">Mis turnos asignados</h3>
+                <p>El monitor consulta aquí sus clases. Los turnos creados o reasignados por el encargado aparecen automáticamente en esta vista de la demo.</p>
+                <div class="side-illustration" aria-hidden="true"><span>✓</span><span class="side-lines">━━━━━━<br />━━━━<br />━━━━━━━</span></div>
+                <div class="small-note"><strong>Sin inicio de sesión</strong><span>Esta vista es pública y ficticia; no representa permisos reales.</span></div>
+              </aside>
+            </div>
+
+            <div class="demo-footer">
+              <span class="dot-blue" aria-hidden="true"></span>
+              <span id="status-text" role="status" aria-live="polite">Lista para probar: selecciona una clase.</span>
+              <span class="footer-mode">SIMULACIÓN LOCAL</span>
+            </div>
+          </div>
+
+          <p class="privacy-note">Prototipo con datos ficticios. Los turnos se guardan solo en <strong>este navegador</strong>: las vistas Encargado y Monitor comparten esta simulación, pero diferentes dispositivos no se sincronizan. No hay cuentas ni avisos reales.</p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

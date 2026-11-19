@@ -957,3 +957,66 @@ a {
     width: 100%;
   }
 }
+
+
+/* =========================================
+   SPRINT 3 - EDICIÓN Y ELIMINACIÓN DE TURNOS
+   ========================================= */
+
+.s3-created-only {
+  margin-top: 20px;
+  padding: 12px 13px;
+  border: 1px solid #d9e5f1;
+  border-radius: 9px;
+  background: #edf5fd;
+  color: #45647e;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.s3-actions {
+  margin-top: 21px;
+  padding-top: 20px;
+  border-top: 1px solid #dbe5ef;
+}
+
+.s3-section-title {
+  margin: 0 0 7px;
+  color: #183d5b;
+  font-size: 15px;
+}
+
+.s3-help {
+  margin: 0;
+  color: #6f8497;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.s3-schedule-form .form-row {
+  margin-top: 13px;
+}
+
+.s3-delete-button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #e9a7a2;
+  border-radius: 9px;
+  background: #fff6f5;
+  color: #a52e2a;
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.s3-delete-button:hover {
+  background: #ffe5e3;
+}
+
+@media (max-width: 390px) {
+  .s3-schedule-form .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+

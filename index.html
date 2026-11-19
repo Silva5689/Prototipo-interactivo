@@ -52,13 +52,18 @@
             <div class="demo-body">
               <div class="demo-main">
                 <div class="panel-head">
-                  <div><h3 id="list-title">Turnos del gimnasio</h3><p id="list-subtitle">Crea un turno nuevo o reasigna uno existente.</p></div>
+                  <div>
+                    <h3 id="list-title">Turnos del gimnasio</h3>
+                    <p id="list-subtitle">Crea un turno nuevo o reasigna uno existente.</p>
+                  </div>
                   <div class="panel-actions">
                     <span class="counter" id="class-count" aria-label="Número de turnos">5 turnos</span>
                     <button type="button" id="create-turn-button" class="create-turn-button">+ Crear turno</button>
                   </div>
                 </div>
+
                 <div id="manager-view" class="class-list" aria-label="Clases disponibles"></div>
+
                 <div id="coach-view" class="coach-view" hidden>
                   <label for="coach-select" class="field-label">Selecciona un monitor ficticio</label>
                   <select id="coach-select" class="field-select"></select>
@@ -68,22 +73,64 @@
               </div>
 
               <aside class="editor" id="editor" aria-labelledby="editor-heading">
-                <div class="editor-top"><span class="step-label">GESTIÓN DE TURNOS</span><span class="editor-icon" aria-hidden="true">↗</span></div>
+                <div class="editor-top">
+                  <span class="step-label">GESTIÓN DE TURNOS</span>
+                  <span class="editor-icon" aria-hidden="true">↗</span>
+                </div>
+
                 <h3 id="editor-heading">Asignar un turno</h3>
                 <p class="editor-description" id="editor-description">Selecciona una clase y elige qué monitor la cubrirá.</p>
 
                 <div id="assignment-panel">
                   <div class="selected-class" id="selected-class" aria-live="polite"></div>
+
                   <label class="field-label" for="new-coach">Monitor asignado</label>
                   <select class="field-select" id="new-coach"></select>
-                  <p
-                    id="assignment-warning"
-                    class="form-warning"
-                    role="alert"
-                    hidden
-                  ></p>
-                  <button type="button" id="save-button" class="save-button" disabled>Guardar asignación <span aria-hidden="true">→</span></button>
-                  <p class="editor-tip"><span aria-hidden="true">ⓘ</span> Para añadir otra clase, pulsa «Crear turno».</p>
+
+                  <p id="assignment-warning" class="form-warning" role="alert" hidden></p>
+
+                  <button type="button" id="save-button" class="save-button" disabled>
+                    Guardar asignación <span aria-hidden="true">→</span>
+                  </button>
+
+                  <p class="editor-tip">
+                    <span aria-hidden="true">ⓘ</span>
+                    Para añadir otra clase, pulsa «Crear turno».
+                  </p>
+
+                  <!-- NUEVO SPRINT 3 -->
+                  <div id="s3-created-only" class="s3-created-only">
+                    Para cambiar el horario o eliminar una clase, selecciona un turno creado en esta demo.
+                  </div>
+
+                  <section id="s3-actions" class="s3-actions" aria-label="Gestionar turno creado" hidden>
+                    <h4 class="s3-section-title">Editar horario</h4>
+                    <p class="s3-help">Modifica el día o la hora de este turno. Los cambios se reflejan en la vista Monitor.</p>
+
+                    <form id="schedule-form" class="s3-schedule-form">
+                      <div class="form-row">
+                        <div>
+                          <label class="field-label" for="schedule-day">Día</label>
+                          <select class="field-select" id="schedule-day" required></select>
+                        </div>
+                        <div>
+                          <label class="field-label" for="schedule-hour">Hora</label>
+                          <input class="field-select" id="schedule-hour" type="time" required />
+                        </div>
+                      </div>
+
+                      <button type="submit" id="update-schedule-button" class="save-button">
+                        Guardar nuevo horario
+                      </button>
+                    </form>
+
+                    <button type="button" id="delete-turn-button" class="s3-delete-button">
+                      Eliminar turno creado
+                    </button>
+
+                    <p id="schedule-warning" class="form-warning" role="alert" aria-live="polite" hidden></p>
+                  </section>
+                  <!-- FIN SPRINT 3 -->
                 </div>
 
                 <form id="creation-panel" class="creation-form" hidden>
@@ -114,16 +161,27 @@
 
                   <label class="field-label" for="create-coach">Asignar a</label>
                   <select class="field-select" id="create-coach" required></select>
+
                   <p id="creation-warning" class="form-warning" role="alert" hidden></p>
-                  <button type="submit" class="save-button">Crear y asignar turno <span aria-hidden="true">→</span></button>
-                  <button type="button" id="cancel-create-button" class="cancel-create-button">Volver a los turnos</button>
+
+                  <button type="submit" class="save-button">
+                    Crear y asignar turno <span aria-hidden="true">→</span>
+                  </button>
+                  <button type="button" id="cancel-create-button" class="cancel-create-button">
+                    Volver a los turnos
+                  </button>
                 </form>
 
                 <div class="change-receipt" id="change-receipt" hidden aria-live="polite">
-                  <div class="receipt-heading"><span class="receipt-check" aria-hidden="true">✓</span> <strong>Último cambio guardado</strong></div>
+                  <div class="receipt-heading">
+                    <span class="receipt-check" aria-hidden="true">✓</span>
+                    <strong>Último cambio guardado</strong>
+                  </div>
                   <p id="receipt-description"></p>
                   <div class="receipt-actions">
-                    <button type="button" id="see-coach-button" class="receipt-primary">Ver como monitor <span aria-hidden="true">→</span></button>
+                    <button type="button" id="see-coach-button" class="receipt-primary">
+                      Ver como monitor <span aria-hidden="true">→</span>
+                    </button>
                     <button type="button" id="undo-button" class="receipt-secondary">Deshacer</button>
                   </div>
                 </div>
@@ -133,8 +191,14 @@
                 <span class="step-label">VISTA DEL MONITOR</span>
                 <h3 id="coach-sidebar-heading">Mis turnos asignados</h3>
                 <p>El monitor consulta aquí sus clases. Los turnos creados o reasignados por el encargado aparecen automáticamente en esta vista de la demo.</p>
-                <div class="side-illustration" aria-hidden="true"><span>✓</span><span class="side-lines">━━━━━━<br />━━━━<br />━━━━━━━</span></div>
-                <div class="small-note"><strong>Sin inicio de sesión</strong><span>Esta vista es pública y ficticia; no representa permisos reales.</span></div>
+                <div class="side-illustration" aria-hidden="true">
+                  <span>✓</span>
+                  <span class="side-lines">━━━━━━<br />━━━━<br />━━━━━━━</span>
+                </div>
+                <div class="small-note">
+                  <strong>Sin inicio de sesión</strong>
+                  <span>Esta vista es pública y ficticia; no representa permisos reales.</span>
+                </div>
               </aside>
             </div>
 
@@ -145,7 +209,11 @@
             </div>
           </div>
 
-          <p class="privacy-note">Prototipo con datos ficticios. Los turnos se guardan solo en <strong>este navegador</strong>: las vistas Encargado y Monitor comparten esta simulación, pero diferentes dispositivos no se sincronizan. No hay cuentas ni avisos reales.</p>
+          <p class="privacy-note">
+            Prototipo con datos ficticios. Los turnos se guardan solo en <strong>este navegador</strong>:
+            las vistas Encargado y Monitor comparten esta simulación, pero diferentes dispositivos
+            no se sincronizan. No hay cuentas ni avisos reales.
+          </p>
         </div>
       </section>
     </main>

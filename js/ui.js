@@ -72,7 +72,7 @@
       const button = createNode(
         "button",
         "change-class",
-        selected ? "Seleccionado" : "Asignar"
+        selected ? "Seleccionado" : "Gestionar"
       );
 
       button.type = "button";
@@ -80,7 +80,7 @@
 
       button.setAttribute(
         "aria-label",
-        `Asignar monitor: ${turn.title}, ` +
+        `Gestionar turno: ${turn.title}, ` +
           `${turn.day} ${turn.hour}`
       );
 
@@ -91,7 +91,6 @@
   }
 
   function createUI(turnService) {
-    // Referencias al DOM, agrupadas en un solo lugar.
     const elements = {
       roleManager: byId("role-manager"),
       roleCoach: byId("role-coach"),
@@ -101,6 +100,7 @@
       coachSelect: byId("coach-select"),
       coachNotice: byId("coach-notice"),
       coachSidebar: byId("coach-sidebar"),
+
       editor: byId("editor"),
       editorHeading: byId("editor-heading"),
       editorDescription: byId("editor-description"),
@@ -109,6 +109,16 @@
       creationWarning: byId("creation-warning"),
       assignmentWarning: byId("assignment-warning"),
       selectedClass: byId("selected-class"),
+
+      // NUEVOS CONTROLES SPRINT 3
+      s3Actions: byId("s3-actions"),
+      s3CreatedOnly: byId("s3-created-only"),
+      scheduleForm: byId("schedule-form"),
+      scheduleDay: byId("schedule-day"),
+      scheduleHour: byId("schedule-hour"),
+      scheduleWarning: byId("schedule-warning"),
+      deleteTurnButton: byId("delete-turn-button"),
+
       newCoach: byId("new-coach"),
       saveButton: byId("save-button"),
       createTurnButton: byId("create-turn-button"),
@@ -125,7 +135,7 @@
       statusText: byId("status-text"),
     };
 
-    // Solo estado visual. Los turnos los gestiona el servicio.
+    // Estado exclusivamente visual.
     const view = {
       role: "manager",
       mode: "edit",
@@ -142,6 +152,34 @@
       element.hidden = !message;
     }
 
+    // SPRINT 3: mostrar edición y eliminación solo
+    // para los turnos creados en esta demo.
+    function renderS3Actions(turn) {
+      const canEdit = Boolean(
+        turn &&
+        turn.created &&
+        view.mode === "edit"
+      );
+
+      elements.s3Actions.hidden = !canEdit;
+
+      elements.s3CreatedOnly.hidden =
+        view.mode !== "edit" ||
+        Boolean(turn && turn.created);
+
+      if (canEdit) {
+        fillSelect(
+          elements.scheduleDay,
+          data.days,
+          turn.day
+        );
+
+        elements.scheduleHour.value = turn.hour;
+      }
+
+      showWarning(elements.scheduleWarning);
+    }
+
     function renderManager() {
       const turns = turnService.listTurns();
 
@@ -150,6 +188,8 @@
         turns[0];
 
       view.selectedId = selected.id;
+
+      renderS3Actions(selected);
 
       const rows = turns.map(turn =>
         createTurnRow(turn, {
@@ -186,13 +226,13 @@
       elements.editorHeading.textContent =
         view.mode === "create"
           ? "Crear y asignar turno"
-          : "Asignar un turno";
+          : "Gestionar turno";
 
       elements.editorDescription.textContent =
         view.mode === "create"
           ? "Elige la clase, el día, la hora y el monitor. " +
             "El turno aparecerá en su horario."
-          : "Selecciona un turno y elige qué monitor lo cubrirá.";
+          : "Selecciona un turno. Puedes cambiar el monitor y, si es nuevo, editarlo o eliminarlo.";
 
       showWarning(elements.assignmentWarning);
     }
@@ -289,7 +329,7 @@
         : "Mis turnos";
 
       elements.listSubtitle.textContent = manager
-        ? "Crea un turno o cambia el monitor asignado a uno existente."
+        ? "Crea o gestiona los turnos del gimnasio."
         : "Elige un monitor ficticio para ver sus turnos asignados.";
 
       const count = turnService.getChangesCount();
@@ -332,7 +372,7 @@
       render();
 
       status(
-        "Turno seleccionado. Ahora puedes modificar su monitor."
+        "Turno seleccionado. Puedes gestionar sus opciones."
       );
 
       if (matchMedia("(max-width: 760px)").matches) {
@@ -358,7 +398,7 @@
           render();
 
           status(
-            "Vista Encargado: crea o asigna turnos."
+            "Vista Encargado: crea o gestiona turnos."
           );
         }
       );
@@ -375,7 +415,7 @@
         }
       );
 
-      // Delegación de eventos en la lista de turnos.
+      // Seleccionar un turno.
       elements.managerView.addEventListener(
         "click",
         event => {
@@ -442,7 +482,7 @@
         }
       );
 
-      // Abrir el formulario de creación.
+      // Abrir formulario de creación.
       elements.createTurnButton.addEventListener(
         "click",
         () => {
@@ -475,12 +515,12 @@
           render();
 
           status(
-            "Puedes reasignar los turnos existentes."
+            "Puedes gestionar los turnos existentes."
           );
         }
       );
 
-      // Crear y asignar un turno nuevo.
+      // Crear y asignar turno.
       elements.creationPanel.addEventListener(
         "submit",
         event => {
@@ -512,7 +552,143 @@
         }
       );
 
-      // Consultar el resultado como empleado.
+      // SPRINT 3: editar día y hora.
+      // Álvaro implementará la lógica en turnos.js.
+      elements.scheduleForm.addEventListener(
+        "submit",
+        event => {
+          event.preventDefault();
+
+          const turn = turnService.listTurns().find(
+            item => item.id === view.selectedId
+          );
+
+          if (!turn || !turn.created) {
+            showWarning(
+              elements.scheduleWarning,
+              "Solo puedes editar turnos creados en la demo."
+            );
+            return;
+          }
+
+          const day = elements.scheduleDay.value;
+          const hour = elements.scheduleHour.value;
+
+          if (day === turn.day && hour === turn.hour) {
+            showWarning(
+              elements.scheduleWarning,
+              "No has cambiado ni el día ni la hora."
+            );
+            return;
+          }
+
+          if (
+            typeof turnService.editTurnSchedule !== "function"
+          ) {
+            showWarning(
+              elements.scheduleWarning,
+              "Falta conectar editTurnSchedule(id, day, hour) en js/turnos.js."
+            );
+            return;
+          }
+
+          const result = turnService.editTurnSchedule(
+            turn.id,
+            day,
+            hour
+          );
+
+          if (!result?.ok) {
+            const message =
+              result?.message ||
+              "No se ha podido actualizar el horario.";
+
+            showWarning(
+              elements.scheduleWarning,
+              message
+            );
+
+            status(message);
+            return;
+          }
+
+          render();
+
+          // El recibo antiguo no debe aparentar
+          // ser la confirmación del nuevo cambio.
+          elements.changeReceipt.hidden = true;
+
+          status(
+            result.message ||
+            "Horario actualizado correctamente."
+          );
+        }
+      );
+
+      // SPRINT 3: eliminar un turno creado.
+      elements.deleteTurnButton.addEventListener(
+        "click",
+        () => {
+          const turn = turnService.listTurns().find(
+            item => item.id === view.selectedId
+          );
+
+          if (!turn || !turn.created) {
+            showWarning(
+              elements.scheduleWarning,
+              "Los turnos originales no se pueden eliminar."
+            );
+            return;
+          }
+
+          if (typeof turnService.deleteTurn !== "function") {
+            showWarning(
+              elements.scheduleWarning,
+              "Falta conectar deleteTurn(id) en js/turnos.js."
+            );
+            return;
+          }
+
+          const confirmed = window.confirm(
+            `¿Eliminar «${turn.title}» del ${turn.day} a las ${turn.hour}?`
+          );
+
+          if (!confirmed) {
+            return;
+          }
+
+          const result = turnService.deleteTurn(turn.id);
+
+          if (!result?.ok) {
+            const message =
+              result?.message ||
+              "No se ha podido eliminar el turno.";
+
+            showWarning(
+              elements.scheduleWarning,
+              message
+            );
+
+            status(message);
+            return;
+          }
+
+          view.selectedId =
+            turnService.listTurns()[0]?.id ?? null;
+
+          view.mode = "edit";
+
+          render();
+          elements.changeReceipt.hidden = true;
+
+          status(
+            result.message ||
+            "Turno eliminado correctamente."
+          );
+        }
+      );
+
+      // Consultar resultado como monitor.
       elements.seeCoachButton.addEventListener(
         "click",
         () => {
@@ -551,7 +727,7 @@
         }
       );
 
-      // Restaurar los datos iniciales.
+      // Restaurar datos iniciales.
       elements.resetButton.addEventListener(
         "click",
         () => {

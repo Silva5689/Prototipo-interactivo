@@ -11,6 +11,7 @@ Proyecto independiente de la one-page del Sprint 2 de Proyectos III.
 
 - Consultar los turnos existentes.
 - Crear nuevas clases.
+- Editar el día y la hora de los turnos creados.
 - Asignar un monitor.
 - Reasignar un turno existente.
 - Evitar conflictos de horario.

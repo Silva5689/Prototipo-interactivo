@@ -101,6 +101,31 @@
       };
     }
 
+    if (
+      raw.type === "schedule" &&
+      turn.created &&
+      data.days.includes(raw.fromDay) &&
+      TIME_PATTERN.test(raw.fromHour) &&
+      data.days.includes(raw.toDay) &&
+      TIME_PATTERN.test(raw.toHour) &&
+      (raw.fromDay !== raw.toDay ||
+        raw.fromHour !== raw.toHour) &&
+      turn.day === raw.toDay &&
+      turn.hour === raw.toHour &&
+      data.coaches.includes(raw.to) &&
+      assignments[raw.id] === raw.to
+    ) {
+      return {
+        type: "schedule",
+        id: raw.id,
+        fromDay: raw.fromDay,
+        fromHour: raw.fromHour,
+        toDay: raw.toDay,
+        toHour: raw.toHour,
+        to: raw.to,
+      };
+    }
+
     return null;
   }
 
@@ -307,6 +332,78 @@
       };
     }
 
+    function editTurnSchedule(id, day, hour) {
+      const turn = getTurn(id);
+
+      if (!turn || !turn.created) {
+        return {
+          ok: false,
+          message:
+            "Solo puedes editar turnos creados en la demo.",
+        };
+      }
+
+      if (
+        !data.days.includes(day) ||
+        !TIME_PATTERN.test(hour)
+      ) {
+        return {
+          ok: false,
+          message: "El día o la hora no son válidos.",
+        };
+      }
+
+      if (turn.day === day && turn.hour === hour) {
+        return {
+          ok: false,
+          message: "No has cambiado ni el día ni la hora.",
+        };
+      }
+
+      const coach = assignedTo(turn);
+
+      if (hasConflict({ day, hour, coach, ignoreId: id })) {
+        return {
+          ok: false,
+          message:
+            `${coach} ya tiene una clase el ` +
+            `${day} a las ${hour}.`,
+        };
+      }
+
+      const previous = {
+        day: turn.day,
+        hour: turn.hour,
+      };
+
+      turn.day = day;
+      turn.hour = hour;
+
+      lastAction = {
+        type: "schedule",
+        id,
+        fromDay: previous.day,
+        fromHour: previous.hour,
+        toDay: day,
+        toHour: hour,
+        to: coach,
+      };
+
+      storage.save({
+        turns,
+        assignments,
+        lastAction,
+      });
+
+      return {
+        ok: true,
+        coach,
+        message:
+          `Horario actualizado: ${turn.title}, ` +
+          `${day} ${hour}.`,
+      };
+    }
+
     function undo() {
       if (!lastAction) {
         return {
@@ -323,6 +420,13 @@
         );
 
         delete assignments[action.id];
+      } else if (action.type === "schedule") {
+        const turn = getTurn(action.id);
+
+        if (turn) {
+          turn.day = action.fromDay;
+          turn.hour = action.fromHour;
+        }
       } else {
         assignments[action.id] = action.from;
       }
@@ -419,6 +523,7 @@
       getCoachNotice,
       assignTurn,
       addTurn,
+      editTurnSchedule,
       undo,
       reset,
     };

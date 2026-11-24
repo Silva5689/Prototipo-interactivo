@@ -289,6 +289,10 @@
         action.type === "create"
           ? `${turn.title} · ${turn.day} ${turn.hour}: ` +
             `turno creado para ${action.to}.`
+          : action.type === "schedule"
+            ? `${turn.title}: horario actualizado de ` +
+              `${action.fromDay} ${action.fromHour} a ` +
+              `${action.toDay} ${action.toHour}.`
           : `${turn.title} · ${turn.day} ${turn.hour}: ` +
             `${action.from} → ${action.to}.`;
     }
@@ -613,11 +617,6 @@
           }
 
           render();
-
-          // El recibo antiguo no debe aparentar
-          // ser la confirmación del nuevo cambio.
-          elements.changeReceipt.hidden = true;
-
           status(
             result.message ||
             "Horario actualizado correctamente."

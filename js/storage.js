@@ -27,7 +27,15 @@
 
   function save({ turns, assignments, lastAction }) {
     try {
-      const createdTurns = turns.filter(turn => turn.created);
+      const createdTurns = turns
+        .filter(turn => turn.created)
+        .map(({ id, title, day, hour, defaultCoach }) => ({
+          id,
+          title,
+          day,
+          hour,
+          defaultCoach,
+        }));
 
       localStorage.setItem(
         KEYS.turns,

@@ -404,6 +404,33 @@
       };
     }
 
+    function deleteTurn(id) {
+      const turn = getTurn(id);
+
+      if (!turn || !turn.created) {
+        return {
+          ok: false,
+          message:
+            "Los turnos originales no se pueden eliminar.",
+        };
+      }
+
+      turns = turns.filter(item => item.id !== id);
+      delete assignments[id];
+      lastAction = null;
+
+      storage.save({
+        turns,
+        assignments,
+        lastAction,
+      });
+
+      return {
+        ok: true,
+        message: `Turno eliminado: ${turn.title}.`,
+      };
+    }
+
     function undo() {
       if (!lastAction) {
         return {
@@ -524,6 +551,7 @@
       assignTurn,
       addTurn,
       editTurnSchedule,
+      deleteTurn,
       undo,
       reset,
     };
